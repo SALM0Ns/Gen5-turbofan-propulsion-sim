@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P&W F119 Technical Guide</title>
+    <style>
+        :root {
+            --pw-blue: #00234B;   
+            --pw-red: #E31837;    
+            --bg-light: #FFFFFF;  
+            --text-dark: #111111; 
+            --panel-bg: #F4F4F4;  
+            --border-color: #DDDDDD;
+            --telemetry-bg: #1A202C;
+            --telemetry-text: #63B3ED;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        header {
+            width: 100%;
+            background-color: var(--bg-light);
+            border-bottom: 3px solid var(--pw-red);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 50px;
+            box-sizing: border-box;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .tagline {
+            color: var(--text-dark);
+            font-weight: 700;
+            font-size: 1.1em;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        h1 {
+            color: var(--pw-blue);
+            margin: 30px 0 10px 0;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-light);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            max-width: 1100px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        canvas {
+            background: #F0F3F5; 
+            border-bottom: 1px solid var(--border-color);
+            width: 100%;
+            cursor: crosshair;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            background: var(--panel-bg);
+            padding: 30px;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-width: 260px;
+        }
+
+        button {
+            background-color: transparent;
+            color: var(--text-dark);
+            border: 2px solid var(--text-dark);
+            padding: 15px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-standard {
+            background-color: var(--pw-blue);
+            border-color: var(--pw-blue);
+            color: var(--bg-light);
+        }
+        .btn-standard:hover {
+            background-color: #001530;
+            border-color: #001530;
+        }
+
+        .btn-augmentor {
+            background-color: var(--pw-red) !important;
+            border-color: var(--pw-red) !important;
+            color: var(--bg-light) !important;
+            animation: pulse 1.5s infinite;
+        }
+        .btn-augmentor:hover {
+            background-color: #C0102A !important;
+            border-color: #C0102A !important;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(227, 24, 55, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(227, 24, 55, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(227, 24, 55, 0); }
+        }
+
+        button:disabled {
+            background-color: #E0E0E0 !important;
+            border-color: #E0E0E0 !important;
+            color: #999 !important;
+            cursor: not-allowed;
+            animation: none;
+        }
+
+        .info-panel {
+            font-size: 1.05em;
+            color: #333;
+            flex: 1;
+            margin-right: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .phase-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+
+        .phase-title {
+            color: var(--pw-blue);
+            font-size: 1.4em;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0;
+        }
+
+        .phase-number {
+            background: var(--pw-blue);
+            color: white;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .telemetry-board {
+            background-color: var(--telemetry-bg);
+            border-radius: 4px;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            border-left: 4px solid var(--pw-blue);
+            font-family: 'Courier New', Courier, monospace;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        .telemetry-stat {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .t-label {
+            color: #A0AEC0;
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 2px;
+        }
+
+        .t-value {
+            color: var(--telemetry-text);
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        
+        .t-value.hot { color: #FC8181; }
+        .t-value.extreme { color: var(--pw-red); }
+
+        .phase-desc {
+            line-height: 1.7;
+        }
+
+        .highlight { color: var(--pw-red); font-weight: bold; }
+        .feature-box { background: rgba(0,35,75,0.05); padding: 10px 15px; border-left: 3px solid var(--pw-blue); margin-top: 10px; font-size: 0.95em;}
+
+        footer { margin: 40px 0; font-size: 0.85em; color: #888; text-align: center; }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo-container">
+        <div style="display: flex; align-items: center;">
+            <div style="background-color: var(--pw-blue); color: white; padding: 5px 12px; font-weight: 900; border-radius: 2px; letter-spacing: 1px;">
+                GEN-5
+            </div>
+            <div style="margin-left: 10px; font-weight: 800; font-size: 1.4em; color: var(--pw-blue); letter-spacing: -0.5px;">
+                TURBOFAN <span style="color: var(--pw-red);">LAB</span>
+            </div>
+        </div>
+        
+        <div style="border-left: 2px solid var(--border-color); padding-left: 20px; margin-left: 20px;">
+            <div style="font-weight: 700; font-size: 0.9em; color: #333; letter-spacing: 1px;">AF-119 CORE</div>
+            <div style="font-size: 0.7em; color: #888; font-family: monospace;">SYSTEM DIAGNOSTICS // REV 2.1</div>
+        </div>
+    </div>
+    <div class="tagline">Interactive Engine Cycle</div>
+</header>
+
+    <h1>Thermodynamic Flow Simulator</h1>
+    <div class="subtitle">Detailed cross-sectional visualization of the F119 low-bypass turbofan with live telemetry data.</div>
+    
+    <div class="container">
+        <canvas id="engineCanvas" width="1100" height="400"></canvas>
+
+        <div class="controls">
+            <div class="info-panel" id="infoPanel">
+                <div class="phase-header">
+                    <div class="phase-number" id="phaseNumBadge">0</div> 
+                    <h2 class="phase-title" id="phaseTitleText">System Offline</h2>
+                </div>
+                
+                <div class="telemetry-board" id="telemetryBoard">
+                    <div class="telemetry-stat">
+                        <span class="t-label">Core Temp (T)</span>
+                        <span class="t-value" id="t-temp">Ambient</span>
+                    </div>
+                    <div class="telemetry-stat">
+                        <span class="t-label">Pressure (P)</span>
+                        <span class="t-value" id="t-press">1.0 atm</span>
+                    </div>
+                    <div class="telemetry-stat">
+                        <span class="t-label">Velocity / State</span>
+                        <span class="t-value" id="t-vel">0.0 Mach</span>
+                    </div>
+                </div>
+
+                <div class="phase-desc" id="phaseDesc">The F119 engine is currently idle. Click the button to the right to initiate the sequential thermodynamic simulation.</div>
+            </div>
+            
+            <div class="btn-group">
+                <button id="nextBtn" class="btn-standard">Initiate Phase 1 ➔</button>
+                <button id="resetBtn">System Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>PROPRIETARY DATA SIMULATION - FOR EDUCATIONAL PURPOSES ONLY</footer>
+
+    <script>
+        const canvas = document.getElementById('engineCanvas');
+        const ctx = canvas.getContext('2d');
+        const nextBtn = document.getElementById('nextBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        
+        // UI Elements
+        const phaseTitleText = document.getElementById('phaseTitleText');
+        const phaseNumBadge = document.getElementById('phaseNumBadge');
+        const phaseDesc = document.getElementById('phaseDesc');
+        const telemetryBoard = document.getElementById('telemetryBoard');
+        const tTemp = document.getElementById('t-temp');
+        const tPress = document.getElementById('t-press');
+        const tVel = document.getElementById('t-vel');
+
+        const RED_POINTER = "#E31837";
+        const METAL_DARK = "#4A5568";
+        const METAL_LIGHT = "#CBD5E0";
+        const CENTER_LINE = "#A0AEC0";
+        const AIR_COLD = "rgba(49, 130, 206, 0.5)"; 
+
+        let currentPhase = 0;
+        let particles = [];
+        let time = 0;
+        let vectorAngle = 0;
+
+        const zones = { intake: 20, fan: 140, bypassSplit: 220, compressor: 360, combustor: 500, hpt: 600, lpt: 650, afterburner: 780, nozzle: 950 };
+
+        const phaseData = [
+            { 
+                title: "System Offline", 
+                temp: "Ambient", tempClass: "", press: "1.0 atm", vel: "0.0 Mach",
+                desc: "Engine core at 0% RPM. Flow path is clear. Structural view reveals the outer casing and the inner core geometry." 
+            },
+            { 
+                title: "Induction (Fan Stage)", 
+                temp: "~ 50 °C", tempClass: "", press: "3.0 atm", vel: "Mach 0.5",
+                desc: "Air is sucked in by the massive titanium fan. The velocity of the air is slowed down slightly to prepare for compression. Notice how the air splits: some enters the core, while the rest travels through the outer <span class='highlight'>Bypass Duct</span>." 
+            },
+            { 
+                title: "Compression (HPC)", 
+                temp: "~ 600 °C", tempClass: "hot", press: "25.0+ atm", vel: "Subsonic",
+                desc: "Core air enters the High-Pressure Compressor. As it passes through 6 stages of converging geometry, the volume decreases drastically. <strong>Thermodynamics:</strong> Squeezing the air spikes the pressure enormously, which forces the temperature to rise up to 600°C simply from friction and compression." 
+            },
+            { 
+                title: "Combustion", 
+                temp: "~ 1,900 °C", tempClass: "extreme", press: "24.0 atm", vel: "Accelerating",
+                desc: "JP-8 fuel is atomized and ignited. <strong>Thermodynamics:</strong> Thermal energy is added. The pressure drops slightly due to Rayleigh losses (friction of adding heat to a moving fluid), but the gas rapidly expands, converting heat into immense kinetic potential." 
+            },
+            { 
+                title: "Extraction (Turbines)", 
+                temp: "~ 1,100 °C", tempClass: "hot", press: "Dropping", vel: "Accelerating",
+                desc: "The incredibly hot gas blasts through the Single-Crystal Turbines. <strong>Physics of Work:</strong> The turbines extract energy to spin the front compressors. Because work is being extracted from the fluid, both temperature and pressure drop significantly as it passes through the blades." 
+            },
+            { 
+                title: "Military Thrust (Dry)", 
+                temp: "~ 800 °C", tempClass: "hot", press: "Expanding", vel: "Mach 1.5+",
+                desc: "The exhaust accelerates out the converging-diverging nozzle. <div class='feature-box'><strong>TACTICAL ADVANTAGE: SUPERCRUISE</strong><br>The F119 core is so powerful and aerodynamically efficient that the F-22 can achieve and maintain speeds exceeding Mach 1.5 in this 'Dry' mode. Most jets require afterburners to break the sound barrier. Supercruising allows the Raptor to fly supersonically for extended durations without burning massive amounts of fuel, preserving combat radius and drastically reducing its infrared (heat) signature.</div>" 
+            },
+            { 
+                title: "Augmentation (Wet Thrust)", 
+                temp: "~ 1,650 °C+", tempClass: "extreme", press: "Spiking", vel: "Max Supersonic",
+                desc: "The <span class='highlight'>Augmentor</span> is engaged for absolute maximum power. Raw fuel is sprayed into the exhaust. Because the cold bypass air contains unburned oxygen, the fuel auto-ignites behind the V-Gutter Flameholders. <strong>Physics of Thrust:</strong> We are not adding much mass; we are drastically spiking the <em>temperature</em>. The gas expands violently and is forced out the 2D vectoring nozzle, generating up to 35,000 lbf of thrust." 
+            }
+        ];
+
+        class Particle {
+            constructor(x, y) {
+                this.x = x; this.y = y; this.speed = 0; this.color = AIR_COLD;
+                this.size = 1.5; this.active = true; this.wobble = Math.random() * Math.PI * 2;
+                this.isBypass = Math.random() > 0.6;
+                this.targetY = y; this.offsetY = (Math.random() - 0.5) * 30; 
+            }
+
+            update(phase) {
+                let baseSpeed = 0; const centerY = 200;
+
+                if (phase >= 1 && this.x < zones.fan) {
+                    baseSpeed = 2; this.color = AIR_COLD; this.targetY = centerY + this.offsetY * 4; 
+                } 
+                if (phase >= 2 && this.x >= zones.fan && this.x < zones.compressor) {
+                    baseSpeed = 4;
+                    if (this.isBypass) { this.color = AIR_COLD; this.targetY = this.y > centerY ? centerY + 70 + this.offsetY : centerY - 70 + this.offsetY; } 
+                    else { this.color = "rgba(237, 137, 54, 0.6)"; this.targetY = centerY + this.offsetY * 1.5; }
+                }
+                if (phase >= 3 && this.x >= zones.compressor && this.x < zones.combustor) {
+                    baseSpeed = 7;
+                    if (this.isBypass) { this.color = AIR_COLD; } 
+                    else { this.color = "rgba(229, 62, 62, 0.8)"; this.size = 2.5; this.targetY = centerY + this.offsetY * 1.8; }
+                }
+                if (phase >= 4 && this.x >= zones.combustor && this.x < zones.afterburner) {
+                    baseSpeed = 10;
+                    if (this.isBypass) { this.color = AIR_COLD; } else { this.color = "rgba(155, 44, 44, 0.8)"; }
+                }
+                if (phase >= 5 && this.x >= zones.afterburner) {
+                    if (phase === 6) {
+                        baseSpeed = 26; 
+                        this.color = Math.random() > 0.3 ? "rgba(255, 165, 0, 0.9)" : "rgba(255, 255, 255, 0.8)"; 
+                        this.size = 3.5; this.targetY = centerY + this.offsetY * 3; 
+                    } else {
+                        baseSpeed = 14; 
+                        this.color = this.isBypass ? "rgba(100, 150, 255, 0.3)" : "rgba(150, 50, 50, 0.6)"; 
+                        this.size = 2; this.targetY = centerY + this.offsetY * 2.5;
+                    }
+                }
+
+                this.y += (this.targetY - this.y) * 0.1;
+
+                if ((phase == 1 && this.x >= zones.fan) || (phase == 2 && this.x >= zones.compressor) || (phase == 3 && this.x >= zones.combustor) || (phase == 4 && this.x >= zones.afterburner)) {
+                    baseSpeed = 0; this.active = false;
+                }
+
+                this.x += baseSpeed;
+                if (baseSpeed > 0) { this.wobble += 0.2; this.y += Math.sin(this.wobble) * 0.5; }
+
+                if (this.x > canvas.width + 50) {
+                    this.x = -10; this.y = 200 + (Math.random() - 0.5) * 180;
+                    this.size = 1.5; this.active = true; this.isBypass = Math.random() > 0.6;
+                }
+                
+                if (phase === 6 && this.x > zones.nozzle) { this.y += vectorAngle * (this.x - zones.nozzle) * 0.025; }
+            }
+            draw() {
+                if (this.active || this.x > 0) { ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); }
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < 600; i++) { particles.push(new Particle(Math.random() * canvas.width, 200 + (Math.random() - 0.5) * 180)); }
+        }
+
+        function drawPointer(x, y, text, angle = -1, length = 35) {
+            ctx.strokeStyle = RED_POINTER; ctx.fillStyle = RED_POINTER; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(x, y);
+            let endX = x + (25 * angle); let endY = y - length;
+            ctx.lineTo(endX, endY); ctx.lineTo(endX + (40 * angle), endY); ctx.stroke();
+            ctx.fillStyle = "#1A202C"; ctx.font = "bold 10.5px Helvetica"; ctx.textAlign = angle < 0 ? "right" : "left";
+            ctx.fillText(text, endX + (38 * angle), endY - 5);
+        }
+
+        function drawRealisticEngine() {
+            const centerY = 200;
+            ctx.strokeStyle = CENTER_LINE; ctx.setLineDash([10, 5]); ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(0, centerY); ctx.lineTo(canvas.width, centerY); ctx.stroke(); ctx.setLineDash([]);
+
+            ctx.fillStyle = METAL_LIGHT; ctx.strokeStyle = METAL_DARK; ctx.lineWidth = 2;
+            
+            // Outer Casing
+            ctx.beginPath(); ctx.moveTo(zones.intake, centerY - 110); ctx.lineTo(zones.bypassSplit, centerY - 110); ctx.lineTo(zones.afterburner, centerY - 110); ctx.lineTo(zones.afterburner, centerY - 95); ctx.lineTo(zones.bypassSplit, centerY - 95); ctx.lineTo(zones.intake, centerY - 95); ctx.closePath(); ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(zones.intake, centerY + 110); ctx.lineTo(zones.afterburner, centerY + 110); ctx.lineTo(zones.afterburner, centerY + 95); ctx.lineTo(zones.intake, centerY + 95); ctx.closePath(); ctx.fill(); ctx.stroke();
+
+            // Inner Core
+            ctx.fillStyle = "#A0AEC0"; 
+            ctx.beginPath(); ctx.moveTo(zones.bypassSplit, centerY - 60); ctx.lineTo(zones.compressor, centerY - 40); ctx.lineTo(zones.combustor, centerY - 55); ctx.lineTo(zones.hpt, centerY - 45); ctx.lineTo(zones.afterburner, centerY - 65); ctx.lineTo(zones.afterburner, centerY - 55); ctx.lineTo(zones.hpt, centerY - 30); ctx.lineTo(zones.compressor, centerY - 25); ctx.lineTo(zones.bypassSplit, centerY - 45); ctx.closePath(); ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(zones.bypassSplit, centerY + 60); ctx.lineTo(zones.compressor, centerY + 40); ctx.lineTo(zones.combustor, centerY + 55); ctx.lineTo(zones.hpt, centerY + 45); ctx.lineTo(zones.afterburner, centerY + 65); ctx.lineTo(zones.afterburner, centerY + 55); ctx.lineTo(zones.hpt, centerY + 30); ctx.lineTo(zones.compressor, centerY + 25); ctx.lineTo(zones.bypassSplit, centerY + 45); ctx.closePath(); ctx.fill(); ctx.stroke();
+
+            ctx.fillStyle = METAL_DARK; ctx.fillRect(zones.fan, centerY - 6, zones.lpt - zones.fan, 12);
+            ctx.strokeStyle = METAL_DARK; ctx.lineWidth = 1.5;
+            
+            for(let i=0; i<3; i++) { let x = zones.fan + (i*15); ctx.beginPath(); ctx.moveTo(x, centerY - 105); ctx.lineTo(x, centerY - 6); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x, centerY + 105); ctx.lineTo(x, centerY + 6); ctx.stroke(); }
+            for(let i=0; i<6; i++) { let x = zones.compressor - 100 + (i*14); let gapTop = (centerY - 55) + (i*3); let gapBot = (centerY + 55) - (i*3); ctx.beginPath(); ctx.moveTo(x, gapTop); ctx.lineTo(x, centerY - 10); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x, gapBot); ctx.lineTo(x, centerY + 10); ctx.stroke(); }
+
+            ctx.lineWidth = 3; ctx.strokeStyle = "#DD6B20"; ctx.beginPath(); ctx.moveTo(zones.hpt, centerY - 45); ctx.lineTo(zones.hpt, centerY - 15); ctx.stroke(); ctx.beginPath(); ctx.moveTo(zones.hpt, centerY + 45); ctx.lineTo(zones.hpt, centerY + 15); ctx.stroke();
+            ctx.lineWidth = 2.5; ctx.strokeStyle = METAL_DARK; ctx.beginPath(); ctx.moveTo(zones.lpt, centerY - 50); ctx.lineTo(zones.lpt, centerY - 12); ctx.stroke(); ctx.beginPath(); ctx.moveTo(zones.lpt, centerY + 50); ctx.lineTo(zones.lpt, centerY + 12); ctx.stroke();
+
+            if (currentPhase >= 1) { 
+                ctx.strokeStyle = currentPhase === 6 ? RED_POINTER : METAL_DARK; ctx.lineWidth = 2;
+                let vGutters = [centerY - 45, centerY - 15, centerY + 15, centerY + 45];
+                vGutters.forEach(yPos => { ctx.beginPath(); ctx.moveTo(zones.afterburner + 15, yPos - 10); ctx.lineTo(zones.afterburner, yPos); ctx.lineTo(zones.afterburner + 15, yPos + 10); ctx.stroke(); });
+                ctx.setLineDash([2, 4]); ctx.beginPath(); ctx.moveTo(zones.afterburner - 10, centerY - 80); ctx.lineTo(zones.afterburner - 10, centerY + 80); ctx.stroke(); ctx.setLineDash([]);
+            }
+
+            ctx.save(); ctx.translate(zones.nozzle, centerY);
+            vectorAngle = currentPhase === 6 ? Math.sin(time * 0.15) * 0.3 : 0;
+            ctx.rotate(vectorAngle); ctx.fillStyle = METAL_DARK;
+            let flapOpen = currentPhase === 6 ? 25 : 0;
+            ctx.beginPath(); ctx.moveTo(-110, -95); ctx.lineTo(0, -50 - flapOpen); ctx.lineTo(0, -65 - flapOpen); ctx.lineTo(-110, -110); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(-110, 95); ctx.lineTo(0, 50 + flapOpen); ctx.lineTo(0, 65 + flapOpen); ctx.lineTo(-110, 110); ctx.fill();
+            ctx.restore();
+
+            drawPointer(zones.fan + 15, centerY - 105, "3-STAGE FAN", -1, 40);
+            drawPointer(zones.bypassSplit + 20, centerY - 100, "BYPASS DUCT", -1, 20);
+            drawPointer(zones.compressor - 40, centerY - 45, "6-STAGE HPC", -1, 75);
+            drawPointer(zones.combustor - 30, centerY - 55, "ANNULAR COMBUSTOR", 1, 65);
+            drawPointer(zones.hpt, centerY - 45, "1-STAGE HPT", 1, 35);
+            drawPointer(zones.lpt, centerY - 50, "1-STAGE LPT", 1, 55);
+            
+            if(currentPhase === 6) {
+                drawPointer(zones.afterburner + 10, centerY - 45, "V-GUTTER FLAMEHOLDERS", 1, 80);
+                drawPointer(zones.nozzle - 50, centerY - 95, "2D VECTORING NOZZLE", 1, 40);
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            time++; drawRealisticEngine();
+            particles.forEach(p => { p.update(currentPhase); p.draw(); });
+            requestAnimationFrame(animate);
+        }
+
+        function updateUI() {
+            let data = phaseData[currentPhase];
+            
+            phaseTitleText.innerText = data.title;
+            phaseNumBadge.innerText = currentPhase;
+            phaseDesc.innerHTML = data.desc;
+            
+            // Update Telemetry
+            tTemp.innerText = data.temp;
+            tTemp.className = "t-value " + data.tempClass;
+            tPress.innerText = data.press;
+            tVel.innerText = data.vel;
+
+            // Border color update for telemetry to match phase intensity
+            telemetryBoard.style.borderColor = (currentPhase === 6) ? "var(--pw-red)" : "var(--pw-blue)";
+
+            if (currentPhase === 6) {
+                phaseTitleText.style.color = "var(--pw-red)";
+                phaseNumBadge.style.backgroundColor = "var(--pw-red)";
+                nextBtn.disabled = true;
+                nextBtn.innerText = "MAX THRUST ACHIEVED";
+                nextBtn.className = "btn-standard"; 
+            } else {
+                phaseTitleText.style.color = "var(--pw-blue)";
+                phaseNumBadge.style.backgroundColor = "var(--pw-blue)";
+                nextBtn.disabled = false;
+                
+                if (currentPhase === 5) {
+                    nextBtn.innerText = "ENGAGE AUGMENTOR ➔";
+                    nextBtn.className = "btn-augmentor";
+                } else {
+                    nextBtn.innerText = `Initiate Phase ${currentPhase + 1} ➔`;
+                    nextBtn.className = "btn-standard";
+                }
+            } 
+        }
+
+        nextBtn.addEventListener('click', () => {
+            if (currentPhase < 6) {
+                currentPhase++; updateUI();
+                particles.forEach(p => { if (!p.active) { p.active = true; p.x -= 20; } });
+            }
+        });
+
+        resetBtn.addEventListener('click', () => { currentPhase = 0; updateUI(); initParticles(); });
+
+        initParticles(); updateUI(); animate();
+    </script>
+</body>
+</html>
