@@ -7,7 +7,8 @@ An advanced, browser-based simulator designed to visualize the **Brayton Cycle**
 
 <img width="1470" height="833" alt="Screenshot 2569-04-29 at 22 40 39" src="https://github.com/user-attachments/assets/75cd4215-a58d-4abf-872e-1339292d2087" />
 
-
+You can try by Download HTML Files or Click on this link <https://salm0ns.github.io/Gen5-turbofan-propulsion-sim/>
+ 
 ##  Overview
 This simulator traces the "Suck, Squeeze, Bang, Blow" journey of air particles through the **AF-119 CORE**. It provides a real-time visualization of how energy is added and extracted within a modern jet engine to achieve both efficient Supercruise and maximum Augmented thrust.
 
